@@ -12,6 +12,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 | [docs/notator.md](docs/notator.md) | **Notator 已落地配置：** Plannotator（Chrome）+ herdr-annotate（圈终端字）+ plannotator-tui（Herdr 里审 Markdown），安装、快捷键、如何把批注送回 Agent Session。 |
 | [docs/tab-rename.md](docs/tab-rename.md) | **Tab auto-rename 已落地配置：** pane-topic-sync 把 agent 的 OSC 终端标题同步到 Herdr tab；多 pane 跟焦点；手工名不覆盖。 |
 | [docs/pi-websearch.md](docs/pi-websearch.md) | **Pi 网页搜索：** 为何装 `pi-web-access`、零配置实际走 Exa MCP、和 Claude Code WebSearch 的差别。 |
+| [docs/remote-control.md](docs/remote-control.md) | **RemoteControl 暂不落地：** 社区方案对照、pocket / herdr-remote 试用结论、安全模型。不要再默认装 relay。 |
 
 ## 本机前提（概要）
 
@@ -21,7 +22,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 - 代理：Clash Verge mixed `127.0.0.1:7897`（见功能对照 §2）
 - Perforce 工作流另需 `p4` 和有效 client
 
-Notator 的逐步安装见 [docs/notator.md](docs/notator.md)，不要从功能对照里的「处理」栏直接抄过期方案（例如移植 herdr-reviewr）。Tab 自动命名见 [docs/tab-rename.md](docs/tab-rename.md)，不要叠装第二套 rename 插件。
+Notator 的逐步安装见 [docs/notator.md](docs/notator.md)，不要从功能对照里的「处理」栏直接抄过期方案（例如移植 herdr-reviewr）。Tab 自动命名见 [docs/tab-rename.md](docs/tab-rename.md)，不要叠装第二套 rename 插件。RemoteControl 见 [docs/remote-control.md](docs/remote-control.md)，**不要**再按功能对照旧「处理」栏去装 herdr-remote / herdr-pocket。
 
 ## 仓库约定
 
