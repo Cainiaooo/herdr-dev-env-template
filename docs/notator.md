@@ -43,10 +43,18 @@ TUI 批注：必须在 Herdr 里开（`HERDR_ENV=1`）。Send 把编号批注写
 
 Skill 装在：
 
-- `%USERPROFILE%\.agents\skills\`（Grok / Codex 等共用）：`plannotator-review`、`plannotator-annotate`、`plannotator-last`、`plannotator-tui`
-- `%USERPROFILE%\.claude\skills\`：同上四份
+- `%USERPROFILE%\.agents\skills\`（Grok / Codex 等共用）：Plannotator 安装器管理的 `plannotator`、`plannotator-review`、`plannotator-annotate`、`plannotator-last`，以及本仓库管理的 `plannotator-tui`
+- `%USERPROFILE%\.claude\skills\`：同上五份
 
-浏览器那三份均 `disable-model-invocation: true`：**人来点，模型不要自己弹 Chrome。** `plannotator-tui` **可以**由模型调用：它只在 Herdr 里开一个 pane，批注通过 `herdr agent prompt` 回来。
+五份 skill 均为**仅显式调用**：`disable-model-invocation: true`，Codex 版本另用 `agents/openai.yaml` 的 `allow_implicit_invocation: false`。模型不要因为写完计划、改完代码或看到 Markdown 就主动打开 Chrome / TUI；只有人明确调用对应 skill 时才加载并执行。Herdr 快捷键和插件 action 不经过 Agent skill，不受此设置影响。
+
+Plannotator 更新会替换它管理的四份 skill。安装或升级后保留上游正文，只复核显式调用元数据；不要在本仓库维护它们的内容分叉。`plannotator-tui` 的正文和调用策略以本仓库为准。
+
+统一策略脚本只同步本仓库 TUI skill，并给已安装 skill 补显式调用元数据；不维护 Plannotator 上游正文：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/set-notator-skills-explicit.ps1
+```
 
 ---
 
@@ -183,12 +191,13 @@ herdr config check
 herdr server reload-config
 ```
 
-把 skill 拷到 Agent 能读的位置（本仓库有一份）：
+把显式 skill 拷到 Agent 能读的位置（本仓库有一份）：
 
 ```powershell
 $src = "plugins/plannotator-tui/skills/plannotator-tui"
 Copy-Item -Recurse $src "$env:USERPROFILE\.agents\skills\plannotator-tui" -Force
 Copy-Item -Recurse $src "$env:USERPROFILE\.claude\skills\plannotator-tui" -Force
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/set-notator-skills-explicit.ps1
 ```
 
 冒烟（不要在当前 Agent pane 上 overlay，会盖住对话）：
@@ -294,7 +303,7 @@ P4 的树 / Diff / Submit 仍归 `herdr-perforce`，Plannotator 不替代它。
 
 1. Windows 下用 PowerShell + `HERDR_PLUGIN_ROOT` 拉起官方 exe（和 `herdr-perforce` 同一套）。
 2. `last`（`scripts/last.ps1`）：剥 `.exe`/`.cmd`；Grok / Cursor（CLI 名 `agent`）读各自 session 文件，只展示最新一条助手回复。
-3. Skill：`plugins/plannotator-tui/skills/plannotator-tui`，模型可调用，开完 pane 就结束本轮。
+3. Skill：`plugins/plannotator-tui/skills/plannotator-tui`，仅在人显式调用时加载；开完 pane 就结束本轮。
 
 `herdr-annotate` 上游出现这些信号再退役 **open / Ctrl-click** 垫片：
 

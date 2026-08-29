@@ -1,0 +1,5 @@
+interface:
+  display_name: "Plannotator TUI"
+  short_description: "Review a Markdown document in a Herdr pane."
+policy:
+  allow_implicit_invocation: false
