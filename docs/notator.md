@@ -2,7 +2,13 @@
 
 本机批注层。目标对应 [功能对照.md](../功能对照.md) §6：在 diff / 文档 / 终端文本上标注，并把反馈送回**当前那条 Agent 对话**。
 
-Windows 上不走 Herdr 内嵌浏览器。审代码和文档用系统 Chrome 里的 **Plannotator**；在 Herdr pane 里圈终端文字用 **herdr-annotate**。
+Windows 上不走 Herdr 内嵌浏览器。三条线：
+
+| 审什么 | 用什么 | 反馈怎么回 Agent |
+|---|---|---|
+| Git / P4 diff、URL、跑着的本地网页 | Chrome 里的 **Plannotator** | 谁启动 `plannotator` 并阻塞等 stdout，谁就是会话 |
+| Markdown / 计划 / Agent 刚说的那段 | Herdr pane 里的 **plannotator-tui** | 点 Send / `E`，走 `herdr agent prompt` 写进目标 pane |
+| 终端里圈中的一段字 | **herdr-annotate** | 贴到 focused pane / 剪贴板 |
 
 ---
 
@@ -12,10 +18,13 @@ Windows 上不走 Herdr 内嵌浏览器。审代码和文档用系统 Chrome 里
 |---|---|
 | [herdr-plannotator](https://github.com/plannotator/herdr-plannotator) + [herdr-browser](https://github.com/ogulcancelik/herdr-browser) / [terminal-browser](https://github.com/zenbu-labs/terminal-browser) | **不装。** 清单只有 linux/macos，依赖 Kitty graphics。Windows Terminal 走不通；官方只测过 WezTerm + WSL。 |
 | [herdr-reviewr](https://github.com/persiyanov/herdr-reviewr) | **不装。** 无 Windows，且绑 Git worktree，P4 workspace 不能 fork 它。 |
-| [Plannotator OSS](https://docs.plannotator.ai/open-source/) | **主力。** Windows 官方安装器；`plannotator review` 认 Git 和 Perforce。 |
-| [herdr-annotate](https://github.com/plannotator/herdr-annotate) | **附件。** 终端选中文本；Windows 为 preview。文档审阅用的 `plannotator-tui` 仍是 macOS/Linux。 |
+| [Plannotator OSS](https://docs.plannotator.ai/open-source/) | **主力（diff / URL / 本地网页）。** Windows 官方安装器；`plannotator review` 认 Git 和 Perforce。 |
+| [herdr-annotate](https://github.com/plannotator/herdr-annotate) | **附件。** 终端选中文本；Windows 为 preview。官方 Full 安装把 TUI pane 锁在 macos/linux。 |
+| [plannotator-tui](https://github.com/plannotator/plannotator-tui) | **Markdown 在终端里审。** v0.3.0 已有 `x86_64-pc-windows-msvc` 官方包。Herdr 侧用本仓库 [plugins/plannotator-tui](../plugins/plannotator-tui) 垫一层，等上游 `herdr-annotate` 自己接 Windows。 |
 
-批注回到 Agent 的方式：**谁启动 `plannotator` 并阻塞等 stdout，谁就是会话。** 不是 Herdr pane ID，也不是「系统里随便开一次 review」。自己在空终端跑 `plannotator review`，没有任何 Agent 会收到结果。
+Chrome 批注：**谁启动 `plannotator` 并阻塞等 stdout，谁就是会话。** 自己在空终端跑 `plannotator review`，没有任何 Agent 会收到结果。
+
+TUI 批注：必须在 Herdr 里开（`HERDR_ENV=1`）。Send 把编号批注写进目标 Agent pane，**不要**让 Agent 阻塞等进程退出。
 
 ---
 
@@ -25,17 +34,19 @@ Windows 上不走 Herdr 内嵌浏览器。审代码和文档用系统 Chrome 里
 |---|---|
 | Herdr | 0.8.2，`%LOCALAPPDATA%\Programs\Herdr\bin\herdr.exe` |
 | Plannotator | 0.27.9，`%LOCALAPPDATA%\plannotator\plannotator.exe` |
+| plannotator-tui | 0.3.0，`%LOCALAPPDATA%\plannotator\plannotator-tui.exe`（同目录已在用户 PATH） |
 | Bun | 1.4.0（winget `Oven-sh.Bun`） |
 | herdr-annotate | 插件 id `annotate` 0.3.0，`herdr plugin install plannotator/herdr-annotate` |
+| plannotator-tui 插件 | 插件 id `plannotator-tui`，`herdr plugin link` 本仓库 `plugins/plannotator-tui` |
 | Perforce CLI | 已有 `p4`；本机 client `xucongwei_development`，root `E:\Project` |
 | 系统浏览器 | Chrome 151 |
 
 Skill 装在：
 
-- `%USERPROFILE%\.agents\skills\`（Grok / Codex 等共用）：`plannotator-review`、`plannotator-annotate`、`plannotator-last`
-- `%USERPROFILE%\.claude\skills\`：同上三份
+- `%USERPROFILE%\.agents\skills\`（Grok / Codex 等共用）：`plannotator-review`、`plannotator-annotate`、`plannotator-last`、`plannotator-tui`
+- `%USERPROFILE%\.claude\skills\`：同上四份
 
-三份 skill 均 `disable-model-invocation: true`：**人来点，模型不要自己弹浏览器。**
+浏览器那三份均 `disable-model-invocation: true`：**人来点，模型不要自己弹 Chrome。** `plannotator-tui` **可以**由模型调用：它只在 Herdr 里开一个 pane，批注通过 `herdr agent prompt` 回来。
 
 ---
 
@@ -92,7 +103,7 @@ plannotator review --help
 herdr plugin install plannotator/herdr-annotate --yes
 ```
 
-Windows 会跳过 `bash scripts/fetch-plannotator-tui.sh`。可用动作只有 `capture` / `copy-context` / `manage`。`open` / `last` / `open-link` 是 macos/linux。
+Windows 会跳过 `bash scripts/fetch-plannotator-tui.sh`。官方插件在 Windows 上只有 `capture` / `copy-context` / `manage`。`open` / `last` / `open-link` 仍标 macos/linux，文档审阅走下面第 4 步的垫片。
 
 在 `%APPDATA%\herdr\config.toml` 增加（本机已写）：
 
@@ -125,6 +136,72 @@ herdr server reload-config
 
 冒烟：`herdr plugin action invoke manage --plugin annotate`，日志 status 应为 `succeeded`。
 
+### 4. plannotator-tui（Windows 垫片）
+
+官方 [plannotator-tui](https://github.com/plannotator/plannotator-tui) v0.3.0 已经发 Windows 包（`plannotator-tui-x86_64-pc-windows-msvc.exe`）。`herdr-annotate` 的 fetch 脚本还没有 Windows 分支，pane 命令也是 `sh`/`bash`，所以不改官方插件，另 link 本仓库的薄插件：下载官方二进制，按 `herdr-perforce` 的方式用 PowerShell + `HERDR_PLUGIN_ROOT` 拉起。
+
+在 **herdr-dev-env** 仓库根目录：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File plugins/plannotator-tui/scripts/fetch.ps1
+herdr plugin link "$PWD/plugins/plannotator-tui"
+```
+
+`fetch.ps1` 会：
+
+1. 按 `plugins/plannotator-tui/plannotator-tui.version`（当前 `0.3.0`）下载并校验 sha256
+2. 写入插件 `bin/plannotator-tui.exe`（不进 git）
+3. 再拷一份到 `%LOCALAPPDATA%\plannotator\plannotator-tui.exe`，跟 `plannotator.exe` 同目录，用户 PATH 已经有这条
+
+校验：
+
+```powershell
+plannotator-tui --version    # 期望 0.3.0
+herdr plugin list            # 应有 plannotator-tui (Plannotator TUI) enabled [local:…]
+```
+
+在 `%APPDATA%\herdr\config.toml` **接着**增加（本机已写）：
+
+```toml
+[[keys.command]]
+key = "prefix+o"
+type = "plugin_action"
+command = "plannotator-tui.open"
+description = "review documents in this folder"
+
+[[keys.command]]
+key = "prefix+shift+o"
+type = "plugin_action"
+command = "plannotator-tui.last"
+description = "review the agent's last reply"
+```
+
+然后：
+
+```powershell
+herdr config check
+herdr server reload-config
+```
+
+把 skill 拷到 Agent 能读的位置（本仓库有一份）：
+
+```powershell
+$src = "plugins/plannotator-tui/skills/plannotator-tui"
+Copy-Item -Recurse $src "$env:USERPROFILE\.agents\skills\plannotator-tui" -Force
+Copy-Item -Recurse $src "$env:USERPROFILE\.claude\skills\plannotator-tui" -Force
+```
+
+冒烟（不要在当前 Agent pane 上 overlay，会盖住对话）：
+
+```powershell
+plannotator-tui --snapshot docs/notator.md 100 24 0
+herdr plugin pane open --plugin plannotator-tui --entrypoint doc --placement tab --workspace <闲置 workspace> --cwd $PWD --env "PLANNOTATOR_TUI_FILE=$PWD\docs\notator.md" --no-focus
+```
+
+打开后 footer 应有 `notator.md · 0 annotations`。看完关掉那个 tab。
+
+可选：`%APPDATA%\plannotator-tui\config.toml` 里改 `[herdr] placement`（`overlay` 默认 / `split` / `popup`）。`plannotator-tui config` 打印生效值。
+
 ---
 
 ## 日常怎么用
@@ -133,7 +210,7 @@ herdr server reload-config
 
 在**那条正在干活的 Agent 对话**里让它开 Plannotator，不要另开终端自己跑。
 
-Grok 示例：
+Grok 示例（Chrome，Agent **阻塞**等 stdout）：
 
 - `/plannotator-review` 或「用 Plannotator 审一下当前改动」
 - `/plannotator-annotate plan.md`
@@ -141,19 +218,40 @@ Grok 示例：
 
 Agent 执行对应命令并阻塞。Chrome 打开后你点 **Send Feedback** 或 **Approve**。进程退出，stdout 回到**同一次**工具调用，Agent 按批注继续。不要把浏览器内容复制进聊天。
 
+Grok 示例（TUI，Agent **开完就结束本轮**）：
+
+- 「用 plannotator-tui 审一下 `docs/plan.md`」
+- 或 Agent 自己写完计划后跑 `plannotator-tui herdr open docs/plan.md`
+
+TUI 在 Herdr 里打开。你拖选 / `v`，`a` 👍 · `c` 💬 · `d` ✗，然后 **Send** 或 `E`。批注成为目标 pane 里 Agent 的下一条消息。`q` 关掉。Agent 不要 poll、不要等进程退出。
+
 cwd 必须对：P4 审阅在 client view 里开（本机是 `E:\Project`）。在 Git 仓库目录跑会走 Git，不会走 Perforce。
 
-自己在终端跑 `plannotator review` 也可以看 diff，但没有 Agent 在等 stdout。要把结果给 Session，只能粘贴终端输出，或关掉这次、让 Agent 重新开。
+自己在终端跑 `plannotator review` / `plannotator-tui file.md` 也可以看，但没有 Agent 在等。TUI 在 Herdr 外面时 Send 只走剪贴板（OSC 52），不会 `herdr agent prompt`。
 
-### Herdr 快捷键（终端文字）
+### Herdr 快捷键
 
 | 键 | 动作 |
 |---|---|
 | `Ctrl+B` `A` | 给当前选中文字写备注 |
 | `Ctrl+B` `Shift+A` | 复制全部备注为给 Agent 的 Markdown |
 | `Ctrl+B` `M` | 管理备注 |
+| `Ctrl+B` `O` | 用 plannotator-tui 审当前 pane 目录（文件树） |
+| `Ctrl+B` `Shift+O` | 用 plannotator-tui 审 focused Agent 最近回复 |
+| Ctrl-click `file://…md` | 用 plannotator-tui 打开那个 Markdown |
 
-这和 Plannotator 网页审阅是两条线：前者贴到 focused pane / 剪贴板，后者走启动它的那次 CLI stdout。
+`Ctrl+B Shift+O` 读 **当前 focused Agent pane**（只打开最新一条助手回复）：
+
+| Herdr 认的 agent | 进程名（Windows） | last 从哪读 |
+|---|---|---|
+| `grok` | `grok.exe`（也有一份 `~\.grok\bin\agent.exe`） | `~\.grok\sessions\<cwd-slug>\<session-id>\chat_history.jsonl` |
+| `cursor` | `cursor-agent` / `cursor-agent.cmd` / 别名 **`agent`** | `~\.cursor\projects\<slug>\agent-transcripts\<id>\<id>.jsonl` |
+| `claude` / `codex` / `pi` / `copilot` / `droid` | `codex.exe` 等 | 剥掉 `.exe`/`.cmd` 后交给官方 last |
+| `agy` 及其它 | `agy.exe` 等 | `herdr agent read` 的近期屏幕。Agy 会话是 protobuf，垫片不解析 |
+
+不要走官方 `plannotator-tui herdr last` 的默认路径：对不上 host 就会打开 `~\.claude\projects` 里别的仓库。`agent` 同时是 Cursor CLI 的别名和 Grok 目录里的一份 exe，以 Herdr 的 `pane.agent` 为准。
+
+终端圈字、TUI 审 Markdown、Chrome 审 diff，是三条线。
 
 ### Perforce
 
@@ -165,7 +263,8 @@ P4 的树 / Diff / Submit 仍归 `herdr-perforce`，Plannotator 不替代它。
 
 ## 刻意没做的
 
-- **没把 skill 改成模型可调用。** 需要 Agent 改完自动弹审阅时，再跑安装器 `-Reconfigure`，或 `-ModelInvocable plannotator-review`。
+- **没把 Chrome 那三份 skill 改成模型可调用。** 需要 Agent 改完自动弹浏览器时，再跑安装器 `-Reconfigure`，或 `-ModelInvocable plannotator-review`。TUI skill 已经允许模型调用。
+- **没改 herdr-annotate 上游，也没提 issue。** Windows TUI 是本仓库垫片。退役条件见下一节。
 - **没装 Claude Code marketplace 插件。** 本机 `claude` 是损坏的 `claude-cac` 包装。`~\.claude\skills\` 已有文件；Claude 本体修好后在里面执行：
   ```
   /plugin marketplace add backnotprop/plannotator
@@ -177,12 +276,56 @@ P4 的树 / Diff / Submit 仍归 `herdr-perforce`，Plannotator 不替代它。
 
 ---
 
+## 上游会不会直接支持；垫片何时卸
+
+没有公开时间表。截至 2026-08-29：
+
+| 层 | 官方现状 | 我们的判断 |
+|---|---|---|
+| `plannotator-tui` 二进制 | v0.3.0 已发 `x86_64-pc-windows-msvc.exe`，README 写了 Windows 预编译包 | **已经支持。** 本机用的就是这份，不 fork TUI。 |
+| `herdr-annotate` Full | README 仍写 TUI「macOS and Linux today」；`[[build]]` / `doc` pane / `open` / `last` / Ctrl-click 都是 `platforms = ["macos","linux"]`；fetch 脚本没有 Windows 分支 | **还没接。** 插件本身标了 Windows，但只给圈字（Lite 那套）。二进制都有了，接 Windows 是自然下一步，仓库里没有 issue、没有日期。 |
+| `plannotator-tui last` 的 host | 认 claude / codex / pi / copilot / droid。不认 `grok` / `cursor`，也不剥 `.exe`/`.cmd`。对不上就**默认 Claude Code** | **短期不会 magically 变好。** Grok、Cursor CLI（`agent`）的 last 要一直留在垫片里，直到 `plannotator-tui-hosts` 合入。 |
+
+所以：官方**很可能**会让 `herdr plugin install plannotator/herdr-annotate` 在 Windows 上也能 `prefix+o` 审 Markdown（那只是 fetch + 非 bash 启动）。**不要指望**同一天就能审 Grok / Cursor 的 last reply。那要改 `plannotator-tui-hosts`，或继续留 `scripts/last.ps1`。
+
+**不要另开 `plannotator-tui-windows` 库。** 垫片不是 TUI fork，能扩展的只有启动层；`open` 会随官方 Windows 支持退役，长期只剩 `last.ps1`。继续放在 `herdr-dev-env/plugins/plannotator-tui`，新机器按本节安装。精力优先给上游 PR，而不是养第二个仓库。
+
+本仓库垫片真正多出来的、卸官方插件也带不走的：
+
+1. Windows 下用 PowerShell + `HERDR_PLUGIN_ROOT` 拉起官方 exe（和 `herdr-perforce` 同一套）。
+2. `last`（`scripts/last.ps1`）：剥 `.exe`/`.cmd`；Grok / Cursor（CLI 名 `agent`）读各自 session 文件，只展示最新一条助手回复。
+3. Skill：`plugins/plannotator-tui/skills/plannotator-tui`，模型可调用，开完 pane 就结束本轮。
+
+`herdr-annotate` 上游出现这些信号再退役 **open / Ctrl-click** 垫片：
+
+- `herdr-plugin.toml` 里 `doc` / `open` / `open-link` / `markdown-file` 带 `windows`
+- `scripts/fetch-plannotator-tui.sh`（或 `.ps1`）能装 `plannotator-tui-x86_64-pc-windows-msvc.exe`
+- pane 命令不再依赖 `sh`/`bash`，或 Herdr 能在 Windows 上跑它
+- 本机 `herdr plugin action list --plugin annotate` 能看到 Windows 的 `open`
+
+那时：
+
+```powershell
+herdr plugin unlink plannotator-tui
+# config.toml：prefix+o / Ctrl-click 改绑 annotate.open / annotate.open-link
+# prefix+shift+o 先留着本仓库 last.ps1，直到上游 last 认 grok.exe / cursor-agent.cmd / agent
+```
+
+值得给上游提、但本仓库**没提**的（有空再开）：
+
+- `herdr-annotate`：Windows 下载官方 TUI、用非 bash 启动 pane。
+- `plannotator-tui`：`known_host` / `detect_host` 去掉 `.exe`/`.cmd`；Grok 读 `~\.grok\sessions`；Cursor Agent CLI 读 `~\.cursor\projects\...\agent-transcripts`。
+
+---
+
 ## 卸载（如需）
 
 ```powershell
+herdr plugin unlink plannotator-tui
 herdr plugin action invoke unconfigure --plugin annotate   # 若曾跑过 configure；当前 annotate 插件无此项
 herdr plugin uninstall annotate
 plannotator uninstall --yes
+Remove-Item "$env:LOCALAPPDATA\plannotator\plannotator-tui.exe" -ErrorAction SilentlyContinue
 ```
 
 `plannotator uninstall --purge` 会删本地计划/历史，确认后再用。

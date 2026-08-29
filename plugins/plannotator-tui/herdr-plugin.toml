@@ -1,0 +1,90 @@
+id = "plannotator-tui"
+name = "Plannotator TUI"
+version = "0.3.0"
+min_herdr_version = "0.8.0"
+description = "Annotate Markdown in a Herdr pane and send the review to the focused agent."
+platforms = ["windows"]
+
+# Upstream herdr-annotate still gates the TUI pane to macos/linux (bash fetch + sh launcher).
+# This shim fetches the official Windows binary and runs it the same way herdr-perforce
+# launches Windows panes: PowerShell + HERDR_PLUGIN_ROOT, never a plugin-relative exe.
+
+[[build]]
+platforms = ["windows"]
+command = [
+  "powershell",
+  "-NoProfile",
+  "-ExecutionPolicy",
+  "Bypass",
+  "-File",
+  "scripts/fetch.ps1",
+]
+
+# Windows pane/action spawn resolves relative programs against the Herdr process
+# directory, not the plugin root. Resolve HERDR_PLUGIN_ROOT like herdr-perforce.
+
+[[panes]]
+id = "doc"
+title = "Annotate"
+placement = "overlay"
+platforms = ["windows"]
+command = [
+  "powershell",
+  "-NoProfile",
+  "-ExecutionPolicy",
+  "Bypass",
+  "-Command",
+  '''$root = $env:HERDR_PLUGIN_ROOT; if (-not $root) { Write-Error "HERDR_PLUGIN_ROOT is missing"; exit 69 }; if ($root.StartsWith('\\?\')) { $root = $root.Substring(4) }; & (Join-Path $root "scripts\run.ps1") pane''',
+]
+
+[[actions]]
+id = "open"
+title = "Annotate: open here"
+description = "Review the focused pane's folder in plannotator-tui and send feedback to its agent."
+contexts = ["workspace", "pane"]
+platforms = ["windows"]
+command = [
+  "powershell",
+  "-NoProfile",
+  "-ExecutionPolicy",
+  "Bypass",
+  "-Command",
+  '''$root = $env:HERDR_PLUGIN_ROOT; if (-not $root) { Write-Error "HERDR_PLUGIN_ROOT is missing"; exit 69 }; if ($root.StartsWith('\\?\')) { $root = $root.Substring(4) }; & (Join-Path $root "scripts\run.ps1") open''',
+]
+
+[[actions]]
+id = "open-link"
+title = "Annotate this file"
+description = "Open a Ctrl-clicked Markdown file in plannotator-tui."
+contexts = ["pane"]
+platforms = ["windows"]
+command = [
+  "powershell",
+  "-NoProfile",
+  "-ExecutionPolicy",
+  "Bypass",
+  "-Command",
+  '''$root = $env:HERDR_PLUGIN_ROOT; if (-not $root) { Write-Error "HERDR_PLUGIN_ROOT is missing"; exit 69 }; if ($root.StartsWith('\\?\')) { $root = $root.Substring(4) }; & (Join-Path $root "scripts\run.ps1") open''',
+]
+
+[[actions]]
+id = "last"
+title = "Annotate: agent's last message"
+description = "Review the focused agent's most recent message in plannotator-tui and send feedback back."
+contexts = ["pane"]
+platforms = ["windows"]
+command = [
+  "powershell",
+  "-NoProfile",
+  "-ExecutionPolicy",
+  "Bypass",
+  "-Command",
+  '''$root = $env:HERDR_PLUGIN_ROOT; if (-not $root) { Write-Error "HERDR_PLUGIN_ROOT is missing"; exit 69 }; if ($root.StartsWith('\\?\')) { $root = $root.Substring(4) }; & (Join-Path $root "scripts\run.ps1") last''',
+]
+
+[[link_handlers]]
+id = "markdown-file"
+title = "Annotate this file"
+pattern = "^file://.*\\.(md|markdown|mdx)$"
+action = "open-link"
+platforms = ["windows"]

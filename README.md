@@ -9,7 +9,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 | 文档 | 内容 |
 |---|---|
 | [功能对照.md](功能对照.md) | 目标功能 vs 社区方案 vs 本机处理。Windows 约束写在这里。 |
-| [docs/notator.md](docs/notator.md) | **Notator 已落地配置：** Plannotator + herdr-annotate，安装、快捷键、如何把批注送回 Agent Session。 |
+| [docs/notator.md](docs/notator.md) | **Notator 已落地配置：** Plannotator（Chrome）+ herdr-annotate（圈终端字）+ plannotator-tui（Herdr 里审 Markdown），安装、快捷键、如何把批注送回 Agent Session。 |
 | [docs/pi-websearch.md](docs/pi-websearch.md) | **Pi 网页搜索：** 为何装 `pi-web-access`、零配置实际走 Exa MCP、和 Claude Code WebSearch 的差别。 |
 
 ## 本机前提（概要）
