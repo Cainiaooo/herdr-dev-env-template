@@ -119,7 +119,7 @@ herdr-plus **不会**从子目录往上找 `.herdr-plus`。Agent pane 若 `cd` �
 
 类型：`command`（立刻跑）、`select`（再选一项）、`form`（填一个值）。命令是 Go template，`{{.WorkDir}}` / `{{.Value}}` / `{{opener}}`（Windows 上是 `Start-Process`），同时有 `HERDR_PLUS_*` 环境变量。
 
-默认执行模型是 overlay 里跑完即关。输出快会看不见。本机 toast（`[ui.toast] delivery`）默认 `off`，`herdr notification show` 也不出。需要盯结果的命令不要指望 overlay。
+默认执行模型是 overlay 里跑完即关。输出快会看不见。本机 toast（`[ui.toast] delivery`）默认 `off`，`herdr notification show` 也不出。需要盯结果的命令不要指望 overlay。Toast 本身是 Herdr 功能，记录在 [toast.md](toast.md)；不要为了看 Quick Action 输出去开。
 
 ### Projects
 

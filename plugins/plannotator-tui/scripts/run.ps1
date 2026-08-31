@@ -35,6 +35,7 @@ $subcommand = switch ($Mode) {
         # the TUI skip list is compiled in and this shim cannot extend it.
         . (Join-Path $PSScriptRoot 'open.ps1')
         $target = Resolve-PlannotatorOpenPathFromEnv
+        Show-PlannotatorFolderSendWarning $target
         @('herdr', 'open', $target)
     }
     default { throw "unknown mode $Mode (expected pane, open, last)" }

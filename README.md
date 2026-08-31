@@ -10,6 +10,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 |---|---|
 | [功能对照.md](功能对照.md) | 目标功能 vs 社区方案 vs 本机处理。Windows 约束写在这里。 |
 | [docs/notator.md](docs/notator.md) | **Notator 已落地配置：** Plannotator（Chrome）+ herdr-annotate（圈终端字）+ plannotator-tui（Herdr 里审 Markdown），安装、快捷键、如何把批注送回 Agent Session。 |
+| [docs/toast.md](docs/toast.md) | **Herdr toast：** 后台 Agent / 插件弹出提示。本机默认关；输入化时再开 `delivery = "herdr"`。 |
 | [docs/tab-rename.md](docs/tab-rename.md) | **Tab auto-rename 已落地配置：** pane-topic-sync 把 agent 的 OSC 终端标题同步到 Herdr tab；多 pane 跟焦点；手工名不覆盖。 |
 | [docs/herdr-plus.md](docs/herdr-plus.md) | **herdr-plus 已落地配置：** Go 装到 `D:\DevelopmentEnvironment\go`；Quick Actions / Projects；Windows 必须绑 `*-windows` action；DevDocs Publish / Sync all。 |
 | [docs/pi-websearch.md](docs/pi-websearch.md) | **Pi 网页搜索：** 为何装 `pi-web-access`、零配置实际走 Exa MCP、和 Claude Code WebSearch 的差别。 |

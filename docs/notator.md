@@ -236,6 +236,8 @@ Grok 示例（TUI，Agent **开完就结束本轮**）：
 
 TUI 在 Herdr 里打开。你拖选 / `v`，`a` 👍 · `c` 💬 · `d` ✗，然后 **Send** 或 `E`。批注成为目标 pane 里 Agent 的下一条消息。`q` 关掉。Agent 不要 poll、不要等进程退出。
 
+**文件夹模式的 Send 范围比屏幕上看到的大，容易把旧批注塞给新 Agent。** 已复现：footer / 按钮可以是 **0 annotations**，折叠的目录上也没有「下面有批注」的数字（懒加载：没展开就不往子树加总），点 `E` 却仍把隐藏文件上的旧批注发给当前 Agent。原因是两套逻辑：树上的计数只看**当前列出来的行**；Send 从 0.5 起改成扫这个 Git 仓库在 `~\.plannotator\clients\plannotator-tui\annotations\<project>\` 里**所有 `annotations` 还非空的 md**（记录带着文件路径，不依赖树是否展开）。垫片改不了 exe 里的导出。本机 Herdr toast 是 **off**（说明见 [toast.md](toast.md)），所以 `prefix+o` 打开目录且仓库里还有残留批注时，垫片弹 **Windows 对话框**，列出相对仓库根的路径。Ctrl-click 某一份 md 不会提示。不用重新编译插件。只想发正在看的那一份：Ctrl-click 那个 `file://…md`，或让 Agent 跑 `plannotator-tui herdr open 具体文件.md`（没有文件树，Send 只含这一份）。发完用 rail 的 `x` 清掉。
+
 cwd 必须对：P4 审阅在 client view 里开（本机是 `E:\Project`）。在 Git 仓库目录跑会走 Git，不会走 Perforce。
 
 自己在终端跑 `plannotator review` / `plannotator-tui file.md` 也可以看，但没有 Agent 在等。TUI 在 Herdr 外面时 Send 只走剪贴板（OSC 52），不会 `herdr agent prompt`。
@@ -305,7 +307,7 @@ P4 的树 / Diff / Submit 仍归 `herdr-perforce`，Plannotator 不替代它。
 
 1. Windows 下用 PowerShell + `HERDR_PLUGIN_ROOT` 拉起官方 exe（和 `herdr-perforce` 同一套）。
 2. `last`（`scripts/last.ps1`）：剥 `.exe`/`.cmd`；Grok / Cursor（CLI 名 `agent`）读各自 session 文件，只展示最新一条助手回复。
-3. `open`（`scripts/open.ps1`）：`prefix+o` 落在源码大库（有 `Engine`/`src`/`node_modules` 等）且存在 `docs`/`documentation`/`plans` 时，把那个子目录交给 TUI，避免它为找第一份 Markdown 去 `list()` Intermediate。TUI 自己的跳过名单加不了；Ctrl-click 具体文件和 Agent 显式路径不改。
+3. `open`（`scripts/open.ps1`）：`prefix+o` 落在源码大库（有 `Engine`/`src`/`node_modules` 等）且存在 `docs`/`documentation`/`plans` 时，把那个子目录交给 TUI，避免它为找第一份 Markdown 去 `list()` Intermediate。打开的是目录且该 Git 仓库在 `~\.plannotator\...\<project>\` 里还有未清空的批注时，弹 Herdr 通知（TUI 树上显示 0 也会发）。TUI 自己的跳过名单和 Send 范围加不了；Ctrl-click 具体文件和 Agent 显式路径不改。
 4. Skill：`plugins/plannotator-tui/skills/plannotator-tui`，仅在人显式调用时加载；开完 pane 就结束本轮。
 
 `herdr-annotate` 上游出现这些信号再退役 **open / Ctrl-click** 垫片：
