@@ -20,7 +20,7 @@ Windows 上不走 Herdr 内嵌浏览器。三条线：
 | [herdr-reviewr](https://github.com/persiyanov/herdr-reviewr) | **不装。** 无 Windows，且绑 Git worktree，P4 workspace 不能 fork 它。 |
 | [Plannotator OSS](https://docs.plannotator.ai/open-source/) | **主力（diff / URL / 本地网页）。** Windows 官方安装器；`plannotator review` 认 Git 和 Perforce。 |
 | [herdr-annotate](https://github.com/plannotator/herdr-annotate) | **附件。** 终端选中文本；Windows 为 preview。官方 Full 安装把 TUI pane 锁在 macos/linux。 |
-| [plannotator-tui](https://github.com/plannotator/plannotator-tui) | **Markdown 在终端里审。** v0.3.0 已有 `x86_64-pc-windows-msvc` 官方包。Herdr 侧用本仓库 [plugins/plannotator-tui](../plugins/plannotator-tui) 垫一层，等上游 `herdr-annotate` 自己接 Windows。 |
+| [plannotator-tui](https://github.com/plannotator/plannotator-tui) | **Markdown 在终端里审。** v0.6.0 已有 `x86_64-pc-windows-msvc` 官方包（懒加载目录树）。Herdr 侧用本仓库 [plugins/plannotator-tui](../plugins/plannotator-tui) 垫一层，等上游 `herdr-annotate` 自己接 Windows。 |
 
 Chrome 批注：**谁启动 `plannotator` 并阻塞等 stdout，谁就是会话。** 自己在空终端跑 `plannotator review`，没有任何 Agent 会收到结果。
 
@@ -28,13 +28,13 @@ TUI 批注：必须在 Herdr 里开（`HERDR_ENV=1`）。Send 把编号批注写
 
 ---
 
-## 本机已落地（2026-08-29）
+## 本机已落地（2026-08-31）
 
 | 组件 | 版本 / 位置 |
 |---|---|
 | Herdr | 0.8.2，`%LOCALAPPDATA%\Programs\Herdr\bin\herdr.exe` |
 | Plannotator | 0.27.9，`%LOCALAPPDATA%\plannotator\plannotator.exe` |
-| plannotator-tui | 0.3.0，`%LOCALAPPDATA%\plannotator\plannotator-tui.exe`（同目录已在用户 PATH） |
+| plannotator-tui | 0.6.0，`%LOCALAPPDATA%\plannotator\plannotator-tui.exe`（同目录已在用户 PATH） |
 | Bun | 1.4.0（winget `Oven-sh.Bun`） |
 | herdr-annotate | 插件 id `annotate` 0.3.0，`herdr plugin install plannotator/herdr-annotate` |
 | plannotator-tui 插件 | 插件 id `plannotator-tui`，`herdr plugin link` 本仓库 `plugins/plannotator-tui` |
@@ -146,7 +146,7 @@ herdr server reload-config
 
 ### 4. plannotator-tui（Windows 垫片）
 
-官方 [plannotator-tui](https://github.com/plannotator/plannotator-tui) v0.3.0 已经发 Windows 包（`plannotator-tui-x86_64-pc-windows-msvc.exe`）。`herdr-annotate` 的 fetch 脚本还没有 Windows 分支，pane 命令也是 `sh`/`bash`，所以不改官方插件，另 link 本仓库的薄插件：下载官方二进制，按 `herdr-perforce` 的方式用 PowerShell + `HERDR_PLUGIN_ROOT` 拉起。
+官方 [plannotator-tui](https://github.com/plannotator/plannotator-tui) v0.6.0 已经发 Windows 包（`plannotator-tui-x86_64-pc-windows-msvc.exe`）。`herdr-annotate` 的 fetch 脚本还没有 Windows 分支，pane 命令也是 `sh`/`bash`，所以不改官方插件，另 link 本仓库的薄插件：下载官方二进制，按 `herdr-perforce` 的方式用 PowerShell + `HERDR_PLUGIN_ROOT` 拉起。
 
 在 **herdr-dev-env** 仓库根目录：
 
@@ -157,14 +157,14 @@ herdr plugin link "$PWD/plugins/plannotator-tui"
 
 `fetch.ps1` 会：
 
-1. 按 `plugins/plannotator-tui/plannotator-tui.version`（当前 `0.3.0`）下载并校验 sha256
+1. 按 `plugins/plannotator-tui/plannotator-tui.version`（当前 `0.6.0`）下载并校验 sha256
 2. 写入插件 `bin/plannotator-tui.exe`（不进 git）
 3. 再拷一份到 `%LOCALAPPDATA%\plannotator\plannotator-tui.exe`，跟 `plannotator.exe` 同目录，用户 PATH 已经有这条
 
 校验：
 
 ```powershell
-plannotator-tui --version    # 期望 0.3.0
+plannotator-tui --version    # 期望 0.6.0
 herdr plugin list            # 应有 plannotator-tui (Plannotator TUI) enabled [local:…]
 ```
 
@@ -209,7 +209,9 @@ herdr plugin pane open --plugin plannotator-tui --entrypoint doc --placement tab
 
 打开后 footer 应有 `notator.md · 0 annotations`。看完关掉那个 tab。
 
-可选：`%APPDATA%\plannotator-tui\config.toml` 里改 `[herdr] placement`（`overlay` 默认 / `split` / `popup`）。`plannotator-tui config` 打印生效值。
+v0.6.0 起 TUI 只列当前这一层目录（展开才往下读），并跳过 `node_modules`/`target`/`vendor`/`dist`/`build`/`out`/`__pycache__`/`venv`。这份名单编译在官方 exe 里，垫片改不了。`prefix+o` 额外走 `scripts/open.ps1`：源码大库（有 `src`/`Engine`/`node_modules` 等）且存在 `docs`/`documentation`/`plans` 时，打开那个子目录。
+
+可选：`%APPDATA%\plannotator-tui\config.toml` 里改 `[herdr] placement`（`overlay` 默认 / `split` / `popup`）。`plannotator-tui config` 打印生效值。`[tree]` / extra skip 这类键不存在，写了会启动失败。
 
 ---
 
@@ -245,7 +247,7 @@ cwd 必须对：P4 审阅在 client view 里开（本机是 `E:\Project`）。�
 | `Ctrl+B` `A` | 给当前选中文字写备注 |
 | `Ctrl+B` `Shift+A` | 复制全部备注为给 Agent 的 Markdown |
 | `Ctrl+B` `M` | 管理备注 |
-| `Ctrl+B` `O` | 用 plannotator-tui 审当前 pane 目录（文件树） |
+| `Ctrl+B` `O` | 用 plannotator-tui 审当前 pane 目录（文件树）。源码大库若有 `docs`/`plans`，垫片会先开那个子目录 |
 | `Ctrl+B` `Shift+O` | 用 plannotator-tui 审 focused Agent 最近回复 |
 | Ctrl-click `file://…md` | 用 plannotator-tui 打开那个 Markdown |
 
@@ -287,13 +289,13 @@ P4 的树 / Diff / Submit 仍归 `herdr-perforce`，Plannotator 不替代它。
 
 ## 上游会不会直接支持；垫片何时卸
 
-没有公开时间表。截至 2026-08-29：
+没有公开时间表。截至 2026-08-31：
 
 | 层 | 官方现状 | 我们的判断 |
 |---|---|---|
-| `plannotator-tui` 二进制 | v0.3.0 已发 `x86_64-pc-windows-msvc.exe`，README 写了 Windows 预编译包 | **已经支持。** 本机用的就是这份，不 fork TUI。 |
+| `plannotator-tui` 二进制 | v0.6.0 已发 `x86_64-pc-windows-msvc.exe`；目录树懒加载，启动只列一层，跳过 `node_modules`/`target`/`vendor`/`dist`/`build`/`out`/`__pycache__`/`venv` | **已经支持。** 本机用的就是这份，不 fork TUI。跳过名单写死在二进制里，垫片加不进去。 |
 | `herdr-annotate` Full | README 仍写 TUI「macOS and Linux today」；`[[build]]` / `doc` pane / `open` / `last` / Ctrl-click 都是 `platforms = ["macos","linux"]`；fetch 脚本没有 Windows 分支 | **还没接。** 插件本身标了 Windows，但只给圈字（Lite 那套）。二进制都有了，接 Windows 是自然下一步，仓库里没有 issue、没有日期。 |
-| `plannotator-tui last` 的 host | 认 claude / codex / pi / copilot / droid。不认 `grok` / `cursor`，也不剥 `.exe`/`.cmd`。对不上就**默认 Claude Code** | **短期不会 magically 变好。** Grok、Cursor CLI（`agent`）的 last 要一直留在垫片里，直到 `plannotator-tui-hosts` 合入。 |
+| `plannotator-tui last` 的 host | 认 claude / codex / pi / omp / copilot / droid / hermes / opencode。不认 `grok` / `cursor`，也不剥 `.exe`/`.cmd`。对不上就**默认 Claude Code** | **短期不会 magically 变好。** Grok、Cursor CLI（`agent`）的 last 要一直留在垫片里，直到 `plannotator-tui-hosts` 合入。 |
 
 所以：官方**很可能**会让 `herdr plugin install plannotator/herdr-annotate` 在 Windows 上也能 `prefix+o` 审 Markdown（那只是 fetch + 非 bash 启动）。**不要指望**同一天就能审 Grok / Cursor 的 last reply。那要改 `plannotator-tui-hosts`，或继续留 `scripts/last.ps1`。
 
@@ -303,7 +305,8 @@ P4 的树 / Diff / Submit 仍归 `herdr-perforce`，Plannotator 不替代它。
 
 1. Windows 下用 PowerShell + `HERDR_PLUGIN_ROOT` 拉起官方 exe（和 `herdr-perforce` 同一套）。
 2. `last`（`scripts/last.ps1`）：剥 `.exe`/`.cmd`；Grok / Cursor（CLI 名 `agent`）读各自 session 文件，只展示最新一条助手回复。
-3. Skill：`plugins/plannotator-tui/skills/plannotator-tui`，仅在人显式调用时加载；开完 pane 就结束本轮。
+3. `open`（`scripts/open.ps1`）：`prefix+o` 落在源码大库（有 `Engine`/`src`/`node_modules` 等）且存在 `docs`/`documentation`/`plans` 时，把那个子目录交给 TUI，避免它为找第一份 Markdown 去 `list()` Intermediate。TUI 自己的跳过名单加不了；Ctrl-click 具体文件和 Agent 显式路径不改。
+4. Skill：`plugins/plannotator-tui/skills/plannotator-tui`，仅在人显式调用时加载；开完 pane 就结束本轮。
 
 `herdr-annotate` 上游出现这些信号再退役 **open / Ctrl-click** 垫片：
 

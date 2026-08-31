@@ -6,7 +6,7 @@
 # Claude Code — which opens some other repo's ~/.claude/projects transcript.
 #
 # This script strips .exe/.cmd, reads Grok and Cursor session files, and only then
-# hands Claude/Codex/pi/copilot/droid to upstream last. `agent` is Cursor's CLI
+# hands Claude/Codex/pi/omp/copilot/droid/hermes/opencode to upstream last. `agent` is Cursor's CLI
 # alias; Grok also ships agent.exe — pane.agent from Herdr decides.
 
 $ErrorActionPreference = 'Stop'
@@ -82,10 +82,16 @@ function Get-BinaryHost([string]$Name) {
         'claude-code' { 'claude' }
         'codex' { 'codex' }
         'pi' { 'pi' }
+        'omp' { 'omp' }
+        'oh-my-pi' { 'omp' }
         'copilot' { 'copilot' }
         'copilot-cli' { 'copilot' }
         'droid' { 'droid' }
         'factory' { 'droid' }
+        'hermes' { 'hermes' }
+        'hermes-cli' { 'hermes' }
+        'opencode' { 'opencode' }
+        'open-code' { 'opencode' }
         default { $null }
     }
 }

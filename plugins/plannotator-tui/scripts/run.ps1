@@ -30,7 +30,13 @@ if ($Mode -eq 'last') {
 
 $subcommand = switch ($Mode) {
     'pane' { @('herdr', 'pane') }
-    'open' { @('herdr', 'open') }
+    'open' {
+        # prefix+o / Ctrl-click. Narrow source-tree cwd to docs/ when we can;
+        # the TUI skip list is compiled in and this shim cannot extend it.
+        . (Join-Path $PSScriptRoot 'open.ps1')
+        $target = Resolve-PlannotatorOpenPathFromEnv
+        @('herdr', 'open', $target)
+    }
     default { throw "unknown mode $Mode (expected pane, open, last)" }
 }
 

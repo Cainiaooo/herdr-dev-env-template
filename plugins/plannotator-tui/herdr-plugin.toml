@@ -1,6 +1,6 @@
 id = "plannotator-tui"
 name = "Plannotator TUI"
-version = "0.3.0"
+version = "0.6.0"
 min_herdr_version = "0.8.0"
 description = "Annotate Markdown in a Herdr pane and send the review to the focused agent."
 platforms = ["windows"]
