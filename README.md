@@ -13,6 +13,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 | [docs/toast.md](docs/toast.md) | **Herdr toast：** 后台 Agent / 插件弹出提示。本机默认关；输入化时再开 `delivery = "herdr"`。 |
 | [docs/tab-rename.md](docs/tab-rename.md) | **Tab auto-rename 已落地配置：** pane-topic-sync 把 agent 的 OSC 终端标题同步到 Herdr tab；多 pane 跟焦点；手工名不覆盖。 |
 | [docs/herdr-plus.md](docs/herdr-plus.md) | **herdr-plus 已落地配置：** Go 装到 `D:\DevelopmentEnvironment\go`；Quick Actions / Projects；Windows 必须绑 `*-windows` action；DevDocs Publish / Sync all。 |
+| [docs/keybindings.md](docs/keybindings.md) | **快捷键：** `prefix+←/→` 切上一个/下一个 Agent；Herdr 没有运行时改键 UI，改 `config.toml` 再 reload。 |
 | [docs/pi-websearch.md](docs/pi-websearch.md) | **Pi 网页搜索：** 为何装 `pi-web-access`、零配置实际走 Exa MCP、和 Claude Code WebSearch 的差别。 |
 | [docs/remote-control.md](docs/remote-control.md) | **RemoteControl 暂不落地：** 社区方案对照、pocket / herdr-remote 试用结论、安全模型。不要再默认装 relay。 |
 | [docs/agent-session-history.md](docs/agent-session-history.md) | **Workspace 过往 Agent Session 暂不落地：** 社区 inbox / omnisearch / session-digger 无 Windows；本机用 Grok `/resume`。 |
@@ -26,7 +27,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 - 代理：Clash Verge mixed `127.0.0.1:7897`（见功能对照 §2）
 - Perforce 工作流另需 `p4` 和有效 client
 
-Notator 的逐步安装见 [docs/notator.md](docs/notator.md)，不要从功能对照里的「处理」栏直接抄过期方案（例如移植 herdr-reviewr）。Tab 自动命名见 [docs/tab-rename.md](docs/tab-rename.md)，不要叠装第二套 rename 插件。herdr-plus 见 [docs/herdr-plus.md](docs/herdr-plus.md)，Windows 绑 `*-windows` action，不要叠装 cmd-marks。RemoteControl 见 [docs/remote-control.md](docs/remote-control.md)，**不要**再按功能对照旧「处理」栏去装 herdr-remote / herdr-pocket。Workspace 过往 Agent Session 见 [docs/agent-session-history.md](docs/agent-session-history.md)，**不要**装 inbox / omnisearch / session-digger。Side Chat Pane 见 [docs/side-chat-pane.md](docs/side-chat-pane.md)，**不要**用 durable fork 或 fork-from-message / catchup 来冒充侧边聊天窗口；`pi-herdr-btw` 只服务 Pi。
+Notator 的逐步安装见 [docs/notator.md](docs/notator.md)，不要从功能对照里的「处理」栏直接抄过期方案（例如移植 herdr-reviewr）。Tab 自动命名见 [docs/tab-rename.md](docs/tab-rename.md)，不要叠装第二套 rename 插件。herdr-plus 见 [docs/herdr-plus.md](docs/herdr-plus.md)，Windows 绑 `*-windows` action，不要叠装 cmd-marks。快捷键见 [docs/keybindings.md](docs/keybindings.md)，不要指望 `prefix+s` 设置页能改键。RemoteControl 见 [docs/remote-control.md](docs/remote-control.md)，**不要**再按功能对照旧「处理」栏去装 herdr-remote / herdr-pocket。Workspace 过往 Agent Session 见 [docs/agent-session-history.md](docs/agent-session-history.md)，**不要**装 inbox / omnisearch / session-digger。Side Chat Pane 见 [docs/side-chat-pane.md](docs/side-chat-pane.md)，**不要**用 durable fork 或 fork-from-message / catchup 来冒充侧边聊天窗口；`pi-herdr-btw` 只服务 Pi。
 
 ## 仓库约定
 
