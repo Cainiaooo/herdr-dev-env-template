@@ -16,6 +16,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 | [docs/pi-websearch.md](docs/pi-websearch.md) | **Pi 网页搜索：** 为何装 `pi-web-access`、零配置实际走 Exa MCP、和 Claude Code WebSearch 的差别。 |
 | [docs/remote-control.md](docs/remote-control.md) | **RemoteControl 暂不落地：** 社区方案对照、pocket / herdr-remote 试用结论、安全模型。不要再默认装 relay。 |
 | [docs/agent-session-history.md](docs/agent-session-history.md) | **Workspace 过往 Agent Session 暂不落地：** 社区 inbox / omnisearch / session-digger 无 Windows；本机用 Grok `/resume`。 |
+| [docs/side-chat-pane.md](docs/side-chat-pane.md) | **Side Chat Pane 需求记下：** 各家 `/btw`/`/side` 实现对照、社区插件调研。最像的是 Pi 扩展 `pi-herdr-btw`；Herdr 插件是 fork/交接，不装。 |
 
 ## 本机前提（概要）
 
@@ -25,7 +26,7 @@ Windows 上 Herdr 开发环境的**配置说明和初始化指引**，不是 Her
 - 代理：Clash Verge mixed `127.0.0.1:7897`（见功能对照 §2）
 - Perforce 工作流另需 `p4` 和有效 client
 
-Notator 的逐步安装见 [docs/notator.md](docs/notator.md)，不要从功能对照里的「处理」栏直接抄过期方案（例如移植 herdr-reviewr）。Tab 自动命名见 [docs/tab-rename.md](docs/tab-rename.md)，不要叠装第二套 rename 插件。herdr-plus 见 [docs/herdr-plus.md](docs/herdr-plus.md)，Windows 绑 `*-windows` action，不要叠装 cmd-marks。RemoteControl 见 [docs/remote-control.md](docs/remote-control.md)，**不要**再按功能对照旧「处理」栏去装 herdr-remote / herdr-pocket。Workspace 过往 Agent Session 见 [docs/agent-session-history.md](docs/agent-session-history.md)，**不要**装 inbox / omnisearch / session-digger。
+Notator 的逐步安装见 [docs/notator.md](docs/notator.md)，不要从功能对照里的「处理」栏直接抄过期方案（例如移植 herdr-reviewr）。Tab 自动命名见 [docs/tab-rename.md](docs/tab-rename.md)，不要叠装第二套 rename 插件。herdr-plus 见 [docs/herdr-plus.md](docs/herdr-plus.md)，Windows 绑 `*-windows` action，不要叠装 cmd-marks。RemoteControl 见 [docs/remote-control.md](docs/remote-control.md)，**不要**再按功能对照旧「处理」栏去装 herdr-remote / herdr-pocket。Workspace 过往 Agent Session 见 [docs/agent-session-history.md](docs/agent-session-history.md)，**不要**装 inbox / omnisearch / session-digger。Side Chat Pane 见 [docs/side-chat-pane.md](docs/side-chat-pane.md)，**不要**用 durable fork 或 fork-from-message / catchup 来冒充侧边聊天窗口；`pi-herdr-btw` 只服务 Pi。
 
 ## 仓库约定
 
